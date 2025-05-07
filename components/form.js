@@ -38,39 +38,34 @@ export default function RegisterSection() {
   };
 
   // Maneja el envío del formulario
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitted(true);
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
 
-    // Captura los datos del formulario
-    const data = {
-      name: e.target.name.value,
-      email: e.target.email.value,
-      message: e.target.message.value,
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      try {
+        const res = await fetch('https://backend-production-dd50d.up.railway.app/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'  // Indica JSON:contentReference[oaicite:13]{index=13}
+          },
+          body: JSON.stringify({ name, email, message })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          // Si respuesta no es OK, mostrar el error del servidor
+          console.error('Error del servidor:', data.error);
+          alert(`Error: ${data.error}`);
+          return;
+        }
+        // Éxito
+        console.log('Enviado:', data.message);
+        alert('Mensaje enviado correctamente');
+      } catch (error) {
+        // Error de red u otro fallo de fetch
+        console.error('Error de red:', error);
+        alert('Error de conexión. Intente nuevamente más tarde.');
+      }
     };
 
-    try {
-      // Enviar datos al backend usando la variable de entorno
-      const API_URL = process.env.NEXT_PUBLIC_API_URL;
-      const res = await fetch(`${API_URL}/submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      const result = await res.json();
-      if (res.ok) {
-        alert('Mensaje enviado correctamente');
-      } else {
-        alert('Error: ' + (result.error || 'Desconocido'));
-      }
-    } catch (err) {
-      alert('Error de red');
-      console.error(err);
-    }
-  };
 
   // Limpieza al desmontar el componente
   useEffect(() => {
