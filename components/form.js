@@ -8,6 +8,11 @@ export default function RegisterSection() {
   const [timerStarted, setTimerStarted] = useState(false);
   const timerRef = useRef(null);
 
+  // Estados controlados para los campos del formulario
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+
   // Inicia el temporizador solo una vez al primer interacto
   const startTimer = () => {
     if (submitted || timerStarted) return;
@@ -38,34 +43,31 @@ export default function RegisterSection() {
   };
 
   // Maneja el envío del formulario
+  const handleSubmit = async (e) => {
+    e.preventDefault(); // evita que el formulario recargue la página
 
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      try {
-        const res = await fetch('https://backend-production-dd50d.up.railway.app/submit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'  // Indica JSON:contentReference[oaicite:13]{index=13}
-          },
-          body: JSON.stringify({ name, email, message })
-        });
-        const data = await res.json();
-        if (!res.ok) {
-          // Si respuesta no es OK, mostrar el error del servidor
-          console.error('Error del servidor:', data.error);
-          alert(`Error: ${data.error}`);
-          return;
-        }
-        // Éxito
-        console.log('Enviado:', data.message);
-        alert('Mensaje enviado correctamente');
-      } catch (error) {
-        // Error de red u otro fallo de fetch
-        console.error('Error de red:', error);
-        alert('Error de conexión. Intente nuevamente más tarde.');
+    try {
+      const res = await fetch('/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, message }) // enviamos los valores del estado
+      });
+
+      if (res.ok) {
+        // Limpiar formulario y mostrar mensaje de éxito
+        setName('');
+        setEmail('');
+        setMessage('');
+        setSubmitted(true);
+        alert('Mensaje enviado exitosamente');
+      } else {
+        throw new Error('Error en la petición');
       }
-    };
-
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error de conexión');
+    }
+  };
 
   // Limpieza al desmontar el componente
   useEffect(() => {
@@ -105,6 +107,8 @@ export default function RegisterSection() {
               <input
                 type="text"
                 id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 required
                 className="w-full px-4 py-3 rounded-lg border border-gray-600 bg-gray-800 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               />
@@ -116,6 +120,8 @@ export default function RegisterSection() {
               <input
                 type="email"
                 id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full px-4 py-3 rounded-lg border border-gray-600 bg-gray-800 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               />
@@ -127,6 +133,8 @@ export default function RegisterSection() {
               <textarea
                 id="message"
                 rows={4}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border border-gray-600 bg-gray-800 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               ></textarea>
             </div>
