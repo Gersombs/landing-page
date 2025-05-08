@@ -44,34 +44,39 @@ export default function RegisterSection() {
 
   // Maneja el envío del formulario
   const handleSubmit = async (e) => {
-    e.preventDefault(); // evita que el formulario recargue la página
-
+    e.preventDefault();
+  
     try {
-      const res = await fetch('/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nombre: valorDelNombre,
-          email: valorDelEmail,
-          mensaje: valorDelMensaje
-        })
-      });
-
+      const res = await fetch(
+        'https://backend-production-dd50d.up.railway.app/submit',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nombre: name,     // <-- tu state `name`
+            email: email,     // <-- tu state `email`
+            mensaje: message, // <-- tu state `message`
+          }),
+        }
+      );
+  
       if (res.ok) {
-        // Limpiar formulario y mostrar mensaje de éxito
         setName('');
         setEmail('');
         setMessage('');
         setSubmitted(true);
         alert('Mensaje enviado exitosamente');
       } else {
-        throw new Error('Error en la petición');
+        const err = await res.json();
+        console.error('Error del servidor:', err);
+        alert(`Error: ${err.error || res.statusText}`);
       }
     } catch (error) {
-      console.error('Error:', error);
-      alert('Error de conexión');
+      console.error('Error de red:', error);
+      alert('Error de conexión. Intenta nuevamente más tarde.');
     }
   };
+  
 
   // Limpieza al desmontar el componente
   useEffect(() => {
