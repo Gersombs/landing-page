@@ -45,21 +45,18 @@ export default function RegisterSection() {
   // Maneja el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     try {
-      const res = await fetch(
-        'https://backend-production-dd50d.up.railway.app/submit',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            nombre: name,     // <-- tu state `name`
-            email: email,     // <-- tu state `email`
-            mensaje: message, // <-- tu state `message`
-          }),
-        }
-      );
-  
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/submit`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: name,
+          email: email,
+          mensaje: message,
+        }),
+      });
+
       if (res.ok) {
         setName('');
         setEmail('');
@@ -76,7 +73,6 @@ export default function RegisterSection() {
       alert('Error de conexión. Intenta nuevamente más tarde.');
     }
   };
-  
 
   // Limpieza al desmontar el componente
   useEffect(() => {
