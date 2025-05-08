@@ -5,22 +5,20 @@ export default function RegisterSection() {
   const [visible, setVisible] = useState(true);
   const [countdown, setCountdown] = useState(300); // 5 minutos en segundos
   const [submitted, setSubmitted] = useState(false);
-  const [timerStarted, setTimerStarted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
   const timerRef = useRef(null);
 
-  // Estados controlados para los campos del formulario
+  // Campos controlados
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
 
-  // Inicia el temporizador solo una vez al primer interacto
+  // Inicia el temporizador al primer interacto
   const startTimer = () => {
-    if (submitted || timerStarted) return;
-    setTimerStarted(true);
-    setCountdown(300);
+    if (submitted || timerRef.current) return;
     timerRef.current = setInterval(() => {
-      setCountdown((prev) => {
+      setCountdown(prev => {
         if (prev <= 1) {
           clearInterval(timerRef.current);
           setVisible(false);
@@ -31,21 +29,12 @@ export default function RegisterSection() {
     }, 1000);
   };
 
-  // Reinicia el temporizador si aún no se ha enviado el formulario
-  const resetTimer = () => {
-    if (submitted) return;
-    clearInterval(timerRef.current);
-    setTimerStarted(false);
-    setCountdown(300);
-    setVisible(true);
-    startTimer();
-  };
-
   // Maneja el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !email || !message) {
-      alert('Por favor completa todos los campos.');
+      // Validación antes de enviar
+      setShowPopup(true);
       return;
     }
     setLoading(true);
@@ -57,33 +46,35 @@ export default function RegisterSection() {
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(`Error: ${data.error}`);
+        // Mostrar error del servidor en popup
+        setShowPopup(true);
         return;
       }
+      // Registro exitoso
       setSubmitted(true);
-      alert('¡Mensaje enviado correctamente!');
+      setShowPopup(true);
       setName('');
       setEmail('');
       setMessage('');
+      clearInterval(timerRef.current);
     } catch (err) {
       console.error('Error de conexión:', err);
-      alert('Error de conexión. Intenta de nuevo más tarde.');
+      setShowPopup(true);
     } finally {
       setLoading(false);
     }
   };
 
-  // Limpieza al desmontar el componente
+  // Limpieza
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      clearInterval(timerRef.current);
     };
   }, []);
 
-  // Formatea el tiempo (mm:ss)
-  const formatTime = (seconds) => {
-    const m = String(Math.floor(seconds / 60)).padStart(2, '0');
-    const s = String(seconds % 60).padStart(2, '0');
+  const formatTime = (sec) => {
+    const m = String(Math.floor(sec / 60)).padStart(2, '0');
+    const s = String(sec % 60).padStart(2, '0');
     return `${m}:${s}`;
   };
 
@@ -91,19 +82,19 @@ export default function RegisterSection() {
     <section id="register" className="min-h-screen flex items-center justify-center py-16 text-white">
       <div className="max-w-md w-full px-6">
         <h2 className="text-3xl font-bold text-center mb-8">Registro</h2>
-        {visible ? (
+
+        {/* Formulario oculto tras envío */}
+        {!submitted && visible && (
           <form
             className="space-y-6"
             onFocusCapture={startTimer}
             onClick={startTimer}
             onSubmit={handleSubmit}
           >
-            {/* Temporizador */}
-            {!submitted && (
-              <div className="text-center text-lg font-medium">
-                Tiempo restante: {formatTime(countdown)}
-              </div>
-            )}
+            <div className="text-center text-lg font-medium">
+              Tiempo restante: {formatTime(countdown)}
+            </div>
+
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
                 Nombre completo
@@ -112,11 +103,12 @@ export default function RegisterSection() {
                 id="name"
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={e => setName(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-lg border border-gray-600 bg-gray-800 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                className="w-full px-4 py-3 rounded-lg border border-gray-600 bg-gray-800 text-white focus:ring-2 focus:ring-blue-500"
               />
             </div>
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
                 Correo electrónico
@@ -125,11 +117,12 @@ export default function RegisterSection() {
                 id="email"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={e => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 rounded-lg border border-gray-600 bg-gray-800 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                className="w-full px-4 py-3 rounded-lg border border-gray-600 bg-gray-800 text-white focus:ring-2 focus:ring-blue-500"
               />
             </div>
+
             <div>
               <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-2">
                 Mensaje
@@ -138,35 +131,56 @@ export default function RegisterSection() {
                 id="message"
                 rows={4}
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-gray-600 bg-gray-800 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                onChange={e => setMessage(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border border-gray-600 bg-gray-800 text-white focus:ring-2 focus:ring-blue-500"
               />
             </div>
+
             <button
               type="submit"
-              disabled={submitted || loading}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              disabled={loading}
+              className="w-full bg-blue-600 py-3 rounded-lg text-white hover:bg-blue-700 disabled:opacity-50"
             >
               {loading ? 'Enviando...' : 'Enviar registro'}
             </button>
           </form>
-        ) : (
+        )}
+
+        {/* Mensaje cuando expira el tiempo (antes de enviar) */}
+        {!submitted && !visible && (
           <div className="text-center space-y-4">
-            <p className="text-lg font-semibold text-red-600 mb-4">
-              ⏳ El tiempo para registrarse ha expirado
-            </p>
-            {!submitted && (
-              <button
-                onClick={resetTimer}
-                className="bg-blue-600 text-white py-2 px-6 rounded-lg font-medium hover:bg-blue-700 transition-all transform hover:scale-105"
-              >
-                Reiniciar temporizador
-              </button>
-            )}
+            <p className="text-lg font-semibold text-red-600">⏳ El tiempo ha expirado</p>
+            <button
+              onClick={() => { setVisible(true); setCountdown(300); startTimer(); }}
+              className="bg-blue-600 py-2 px-6 rounded-lg text-white hover:bg-blue-700"
+            >
+              Reiniciar temporizador
+            </button>
           </div>
         )}
       </div>
+
+      {/* Popup genérico */}
+      {showPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-xs text-center">
+            <h3 className="text-xl font-semibold mb-4">
+              {submitted ? '¡Registro exitoso!' : 'Aviso'}
+            </h3>
+            <p className="mb-6">
+              {submitted
+                ? 'Tu mensaje ha sido enviado correctamente.'
+                : 'Por favor completa todos los campos.'}
+            </p>
+            <button
+              onClick={() => setShowPopup(false)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
-

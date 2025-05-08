@@ -1,22 +1,45 @@
 'use client';
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  
+  const router = useRouter();
+
+  const handleScroll = (e, sectionId) => {
+    e.preventDefault();
+
+    const section = document.getElementById(sectionId);
+    if (section) {
+      // Scroll suave
+      section.scrollIntoView({ behavior: 'smooth' });
+
+      // Quitar el hash de la URL sin recargar la página
+      router.replace(router.pathname, undefined, { shallow: true });
+    }
+  };
+
   return (
     <nav className="bg-gradient-to-r from-blue-500 to-purple-600 fixed w-full top-0 left-0 shadow z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo o Título */}
           <div className="flex items-center">
-            <a href="#hero" className="text-2xl font-bold text-gray-100">GamerCo™</a>
+            <a href="#" onClick={(e) => handleScroll(e, 'hero')} className="text-2xl font-bold text-gray-100">
+              GamerCo™
+            </a>
           </div>
           {/* Menú de escritorio */}
           <div className="hidden md:flex items-center space-x-8 text-lg">
-            <a href="#hero" className="text-gray-100 hover:text-gray-300">Inicio</a>
-            <a href="#info" className="text-gray-100 hover:text-gray-300">Información</a>
-            <a href="#registro" className="text-gray-100 hover:text-gray-300">Registro</a>
+            <a href="#hero" onClick={(e) => handleScroll(e, 'hero')} className="text-gray-100 hover:text-gray-300">
+              Inicio
+            </a>
+            <a href="#info" onClick={(e) => handleScroll(e, 'info')} className="text-gray-100 hover:text-gray-300">
+              Información
+            </a>
+            <a href="#register" onClick={(e) => handleScroll(e, 'register')} className="text-gray-100 hover:text-gray-300">
+              Registro
+            </a>
           </div>
           {/* Botón hamburguesa para móvil */}
           <div className="flex items-center md:hidden">
@@ -41,9 +64,36 @@ export default function Navbar() {
       {/* Menú móvil desplegable */}
       {isOpen && (
         <div className="md:hidden px-2 pt-2 pb-3 space-y-1">
-          <a href="#hero" className="block px-3 py-2 rounded-md text-base font-medium text-gray-100 hover:bg-blue-500">Home</a>
-          <a href="#info" className="block px-3 py-2 rounded-md text-base font-medium text-gray-100 hover:bg-blue-500">Información</a>
-          <a href="#registro" className="block px-3 py-2 rounded-md text-base font-medium text-gray-100 hover:bg-blue-500">Registro</a>
+          <a
+            href="#hero"
+            onClick={(e) => {
+              handleScroll(e, 'hero');
+              setIsOpen(false);
+            }}
+            className="block px-3 py-2 rounded-md text-base font-medium text-gray-100 hover:bg-blue-500"
+          >
+            Inicio
+          </a>
+          <a
+            href="#info"
+            onClick={(e) => {
+              handleScroll(e, 'info');
+              setIsOpen(false);
+            }}
+            className="block px-3 py-2 rounded-md text-base font-medium text-gray-100 hover:bg-blue-500"
+          >
+            Información
+          </a>
+          <a
+            href="#register"
+            onClick={(e) => {
+              handleScroll(e, 'register');
+              setIsOpen(false);
+            }}
+            className="block px-3 py-2 rounded-md text-base font-medium text-gray-100 hover:bg-blue-500"
+          >
+            Registro
+          </a>
         </div>
       )}
     </nav>

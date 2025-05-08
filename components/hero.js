@@ -1,8 +1,24 @@
 'use client';
 import { motion } from 'framer-motion';
 import React from 'react';
+import { useRouter } from 'next/router';
 
 const Hero = () => {
+  const router = useRouter();
+
+  const handleScroll = (e, sectionId) => {
+    e.preventDefault();
+
+    const section = document.getElementById(sectionId);
+    if (section) {
+      // Scroll suave
+      section.scrollIntoView({ behavior: 'smooth' });
+
+      // Quitar el hash de la URL sin recargar la página
+      router.replace(router.pathname, undefined, { shallow: true });
+    }
+  };
+
   return (
     <motion.div
       id="hero"
@@ -25,6 +41,7 @@ const Hero = () => {
         </p>
         <a
           href="#register"
+          onClick={(e) => handleScroll(e, 'register')}
           className="inline-block button-contact text-white font-medium py-2 px-4 rounded transition duration-300 animate-pulse"
         >
           Regístrate ahora

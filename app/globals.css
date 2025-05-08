@@ -1,3 +1,4 @@
+/* globals.css */
 @import "tailwindcss";
 
 html {
@@ -12,19 +13,17 @@ body {
 
 .button-contact {
   background: linear-gradient(45deg, 
-  #9F7AEA 0%, 
-  #805AD5 50%,   
-  #6B46C1 100%
+    #9F7AEA 0%, 
+    #805AD5 50%,   
+    #6B46C1 100%
   );
 }
 
-/* Mantener estilos base del body */
-
+/* Banner & slider base */
 .banner {
   width: 45%;
   height: auto;
   position: relative;
-  
 }
 
 .slider {
@@ -34,25 +33,25 @@ body {
   top: 10%;
   left: calc(50% - 100px);
   transform-style: preserve-3d;
-  transform: perspective(1000px);           /* Ajustar -16deg para inclinación vertical */
-  animation: autoRun 20s linear infinite;   /* ANIMACIÓN: 20s = duración total, linear = movimiento constante */
+  transform: perspective(1000px);
+  animation: autoRun 20s linear infinite;
   z-index: 2; 
 }
 
 @keyframes autoRun {
   from { transform: rotateY(0deg); }
-  to { transform: rotateY(360deg); }
+  to   { transform: rotateY(360deg); }
 }
 
 .banner .slider .item {  
   position: absolute;
   inset: 0;
   transform: 
-    rotateY(calc( (var(--position) - 1) * 72deg))
+    rotateY(calc((var(--position) - 1) * 72deg))
     translateZ(300px);
 }
 
-/* Ajustes responsive */
+/* Escritorio: solo aquí cambiamos el tamaño */
 @media (min-width: 1024px) {
   .banner {
     width: 50vw;
@@ -60,8 +59,9 @@ body {
   }
   
   .slider {
-    width: 200px;
-    height: 250px;
+    /* Aumentamos el width/height en desktop */
+    width: 300px;
+    height: 375px;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -70,11 +70,12 @@ body {
   
   .banner .slider .item {
     transform: 
-      rotateY(calc( (var(--position) - 1) * 72deg))
+      rotateY(calc((var(--position) - 1) * 72deg))
       translateZ(400px);
   }
 }
 
+/* Tablet y móvil mantienen los valores anteriores */
 @media (max-width: 1023px) {
   .slider {
     width: 180px;
@@ -83,7 +84,7 @@ body {
   
   .banner .slider .item {
     transform: 
-      rotateY(calc( (var(--position) - 1) * 72deg))
+      rotateY(calc((var(--position) - 1) * 72deg))
       translateZ(250px);
   }
 }
@@ -96,7 +97,7 @@ body {
   
   .banner .slider .item {
     transform: 
-      rotateY(calc( (var(--position) - 1) * 72deg))
+      rotateY(calc((var(--position) - 1) * 72deg))
       translateZ(180px);
   }
 }
