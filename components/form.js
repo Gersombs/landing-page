@@ -6,6 +6,7 @@ export default function RegisterSection() {
   const [countdown, setCountdown] = useState(300); // 5 minutos en segundos
   const [submitted, setSubmitted] = useState(false);
   const [timerStarted, setTimerStarted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const timerRef = useRef(null);
 
   // Estados controlados para los campos del formulario
@@ -33,44 +34,42 @@ export default function RegisterSection() {
   // Reinicia el temporizador si aún no se ha enviado el formulario
   const resetTimer = () => {
     if (submitted) return;
-    setVisible(true);
+    clearInterval(timerRef.current);
     setTimerStarted(false);
     setCountdown(300);
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
+    setVisible(true);
     startTimer();
   };
 
   // Maneja el envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    if (!name || !email || !message) {
+      alert('Por favor completa todos los campos.');
+      return;
+    }
+    setLoading(true);
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nombre: name,
-          email: email,
-          mensaje: message,
-        }),
+        body: JSON.stringify({ nombre: name, email, mensaje: message }),
       });
-
-      if (res.ok) {
-        setName('');
-        setEmail('');
-        setMessage('');
-        setSubmitted(true);
-        alert('Mensaje enviado exitosamente');
-      } else {
-        const err = await res.json();
-        console.error('Error del servidor:', err);
-        alert(`Error: ${err.error || res.statusText}`);
+      const data = await res.json();
+      if (!res.ok) {
+        alert(`Error: ${data.error}`);
+        return;
       }
-    } catch (error) {
-      console.error('Error de red:', error);
-      alert('Error de conexión. Intenta nuevamente más tarde.');
+      setSubmitted(true);
+      alert('¡Mensaje enviado correctamente!');
+      setName('');
+      setEmail('');
+      setMessage('');
+    } catch (err) {
+      console.error('Error de conexión:', err);
+      alert('Error de conexión. Intenta de nuevo más tarde.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -110,8 +109,8 @@ export default function RegisterSection() {
                 Nombre completo
               </label>
               <input
-                type="text"
                 id="name"
+                type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
@@ -123,8 +122,8 @@ export default function RegisterSection() {
                 Correo electrónico
               </label>
               <input
-                type="email"
                 id="email"
+                type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -133,7 +132,7 @@ export default function RegisterSection() {
             </div>
             <div>
               <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-2">
-                Mensaje (opcional)
+                Mensaje
               </label>
               <textarea
                 id="message"
@@ -141,14 +140,14 @@ export default function RegisterSection() {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 className="w-full px-4 py-3 rounded-lg border border-gray-600 bg-gray-800 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              ></textarea>
+              />
             </div>
             <button
               type="submit"
-              disabled={submitted}
-              className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-all transform hover:scale-105 disabled:opacity-50"
+              disabled={submitted || loading}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
-              Enviar registro
+              {loading ? 'Enviando...' : 'Enviar registro'}
             </button>
           </form>
         ) : (
