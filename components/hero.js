@@ -1,22 +1,19 @@
 'use client';
+
 import { motion } from 'framer-motion';
 import React from 'react';
-import { useRouter } from 'next/router';
 
 const Hero = () => {
-  const router = useRouter();
-
   const handleScroll = (e, sectionId) => {
     e.preventDefault();
-
     const section = document.getElementById(sectionId);
-    if (section) {
-      // Scroll suave
-      section.scrollIntoView({ behavior: 'smooth' });
+    if (!section) return;
 
-      // Quitar el hash de la URL sin recargar la página
-      router.replace(router.pathname, undefined, { shallow: true });
-    }
+    // Scroll suave
+    section.scrollIntoView({ behavior: 'smooth' });
+
+    // Quitar el hash de la URL sin recargar la página
+    window.history.replaceState(null, '', window.location.pathname);
   };
 
   return (
@@ -33,7 +30,7 @@ const Hero = () => {
         style={{ backgroundImage: "url('/images/bg.jpg')" }}
       ></div>
 
-      {/* Contenido del Hero centrado */}
+      {/* Contenido centrado */}
       <div className="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-4">
         <h1 className="text-4xl md:text-5xl font-extrabold mb-4">GamerCo 2025</h1>
         <p className="text-lg md:text-2xl mb-8">
@@ -52,4 +49,3 @@ const Hero = () => {
 };
 
 export default Hero;
-
