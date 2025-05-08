@@ -1,4 +1,14 @@
+// next.config.js
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
-
-export default nextConfig;
+module.exports = {
+    experimental: { appDir: true },
+    async rewrites() {
+      return [
+        {
+          source: "/register",
+          destination: "/#register",
+        },
+      ];
+    },
+  };
+  
