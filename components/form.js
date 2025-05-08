@@ -50,7 +50,11 @@ export default function RegisterSection() {
       const res = await fetch('/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, message }) // enviamos los valores del estado
+        body: JSON.stringify({
+          nombre: valorDelNombre,
+          email: valorDelEmail,
+          mensaje: valorDelMensaje
+        })
       });
 
       if (res.ok) {
